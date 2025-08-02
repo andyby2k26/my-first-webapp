@@ -1,15 +1,13 @@
 # app2/Dockerfile
-FROM python:3.9-slim
+# Dockerfile for the second Flask application.
+# Identical to app1's Dockerfile, as the setup is the same.
+FROM python:3.9-slim-buster
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY app.py .
 
-EXPOSE 8000
-
-# Command to run Gunicorn for App 2
-# 'app' is the Flask instance name in app.py
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app", "--forwarded-allow-ips", "*"]

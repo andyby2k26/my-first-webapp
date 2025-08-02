@@ -1,15 +1,16 @@
-# app1/Dockerfile
-FROM python:3.9-slim
+# Dockerfile for the first Flask application.
+# It builds a Python environment, installs dependencies, and runs the Flask app with Gunicorn.
+FROM python:3.9-slim-buster
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
+# Copy requirements.txt and install Python dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copy the Flask application code
+COPY app.py .
 
-EXPOSE 8000
-
-# Command to run Gunicorn for App 1
-# 'app' is the Flask instance name in app.py
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+# Command to run the Flask application using Gunicorn
+# Gunicorn serves the 'app' object from 'app.py' on port 5000
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app", "--forwarded-allow-ips", "*"]

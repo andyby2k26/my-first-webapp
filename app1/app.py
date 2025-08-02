@@ -1,33 +1,75 @@
-# Import the Flask class from the flask module
-from flask import Flask, render_template, request, render_template
-from datetime import datetime
+# app1/app.py
+# The boilerplate Flask application for App 1.
+# It has a main route '/' and a secondary route '/about'.
+# Now uses url_for to generate links, which will correctly prepend the
+# SCRIPT_NAME provided by Nginx.
+# Imported ProxyFix to correctly handle proxy headers.
+from flask import Flask, render_template_string, url_for
+from werkzeug.middleware.proxy_fix import ProxyFix
 
-# Create an instance of the Flask application
-# The __name__ argument helps Flask locate resources like templates
 app = Flask(__name__)
+# Apply ProxyFix to the Flask app to correctly handle forwarded headers
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
-# Define a route for the home page ("/")
-# When a user visits the root URL, this function will be executed
-@app.route("/")
-def home():
-    current_time = datetime.now()
-    # Render the 'index.html' template
-    # Flask looks for templates in a 'templates' folder by default
-    return render_template("index.html", current_time=current_time)
+@app.route('/')
+def index():
+    """Renders the main page for App1."""
+    return render_template_string('''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>App1 Home</title>
+            <style>
+                body { font-family: sans-serif; margin: 20px; background-color: #f0f8ff; color: #333; }
+                h1 { color: #4682b4; }
+                a { color: #1e90ff; text-decoration: none; }
+                a:hover { text-decoration: underline; }
+                div { background-color: #e0f2f7; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            </style>
+        </head>
+        <body>
+            <div>
+                <h1>Hello from App1!</h1>
+                <p>This is the main page for App1, served via Nginx.</p>
+                <p>Try navigating to another page within App1:</p>
+                <a href="{{ url_for('about') }}">Go to About Page (internal link)</a>
+            </div>
+        </body>
+        </html>
+    ''')
 
-@app.route("/page", methods=["POST"])
-def page():
-    user_name = request.form.get("user_name")
-    email = request.form.get("user_email")
-    message = request.form.get("user_message")
-    # Render the 'index.html' template
-    # Flask looks for templates in a 'templates' folder by default
-    return render_template("page.html", name=user_name, email=email, message=message)
+@app.route('/about')
+def about():
+    """Renders the about page for App1."""
+    return render_template_string('''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>App1 About</title>
+            <style>
+                body { font-family: sans-serif; margin: 20px; background-color: #f0f8ff; color: #333; }
+                h1 { color: #4682b4; }
+                a { color: #1e90ff; text-decoration: none; }
+                a:hover { text-decoration: underline; }
+                div { background-color: #e0f2f7; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            </style>
+        </head>
+        <body>
+            <div>
+                <h1>About App1</h1>
+                <p>This is the about page for App1, demonstrating internal routing.</p>
+                <p>Go back to the main page:</p>
+                <a href="{{ url_for('index') }}">Go back to Home (internal link)</a>
+            </div>
+        </body>
+        </html>
+    ''')
 
-# This block ensures the Flask development server runs only when the script is executed directly
-if __name__ == "__main__":
-    # Run the Flask application in debug mode
-    # debug=True allows for automatic reloading on code changes and provides a debugger
-    # host='0.0.0.0' makes the server accessible from any IP address,
-    # which is useful for testing in a local network or Docker
-    app.run(debug=True, host='0.0.0.0')
+if __name__ == '__main__':
+    # When running locally (outside Docker), use this.
+    # Inside Docker, Gunicorn handles the serving.
+    app.run(host='0.0.0.0', port=5000)
