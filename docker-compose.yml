@@ -1,0 +1,33 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  app1:
+    build:
+      context: ./app1 # Build context is the app1 directory
+    restart: always
+    volumes:
+      - ./app1:/app # Mount the app1 directory into the container
+    expose:
+      - 8000 # Expose internal port 8000 for Nginx to access
+
+  app2:
+    build:
+      context: ./app2 # Build context is the app2 directory
+    restart: always
+    volumes:
+      - ./app2:/app # Mount the app2 directory into the container
+    expose:
+      - 8000 # Expose internal port 8000 for Nginx to access
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    volumes:
+      # Mount the custom Nginx config file
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80" # Map host port 80 to Nginx container port 80
+    depends_on:
+      - app1 # Ensure app1 is running before Nginx starts
+      - app2 # Ensure app2 is running before Nginx starts
