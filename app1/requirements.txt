@@ -2,5 +2,5 @@ Flask
 gunicorn
 requests
 Werkzeug
-psycopg2-binary
+psycopg2
 flask-sqlalchemy

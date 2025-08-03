@@ -14,32 +14,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 @app.route('/')
 def index():
     """Renders the main page for App1."""
-    return render_template_string('''
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>App1 Home</title>
-            <style>
-                body { font-family: sans-serif; margin: 20px; background-color: #f0f8ff; color: #333; }
-                h1 { color: #4682b4; }
-                a { color: #1e90ff; text-decoration: none; }
-                a:hover { text-decoration: underline; }
-                div { background-color: #e0f2f7; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-            </style>
-        </head>
-        <body>
-            <div>
-                <h1>Hello from App1!</h1>
-                <p>This is the main page for App1, served via Nginx.</p>
-                <p>Try navigating to another page within App1:</p>
-                <a href="{{ url_for('about') }}">Go to About Page (internal link)</a>
-                <a href="{{ url_for('ellie') }}">Go to Ellie Page (internal link)</a>
-            </div>
-        </body>
-        </html>
-    ''')
+    return render_template('index.html')
 
 @app.route('/about')
 def about():
@@ -74,6 +49,11 @@ def about():
 def ellie():
     """Renders the about page for App1."""
     return render_template('ellie.html')
+
+@app.route('/sam')
+def sam():
+    """Renders the about page for App1."""
+    return render_template('sam.html')
 
 if __name__ == '__main__':
     # When running locally (outside Docker), use this.
