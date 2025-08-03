@@ -2,7 +2,10 @@ FROM python:3.11-alpine
 
 WORKDIR /app
 
-RUN pip install pipdeptree && pipdeptree
+RUN apk add --no-cache \
+    build-base \
+    python3-dev \
+    postgresql-dev
 
 # Install dependencies
 RUN apk add --no-cache postgresql-dev gcc musl-dev
