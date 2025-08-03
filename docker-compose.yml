@@ -14,9 +14,7 @@ services:
       - webapp_network
 
   app1:
-    build:
-      context: ./app1
-      dockerfile: Dockerfile
+    image: andyby2k26/andyby2k26:app1
     expose:
       - "5000"
     networks:
@@ -29,9 +27,7 @@ services:
       SECRET_KEY: 'your-very-long-and-secure-random-secret-key-for-app1'
 
   app2:
-    build:
-      context: ./app2
-      dockerfile: Dockerfile
+    image: andyby2k26/andyby2k26:app2
     expose:
       - "5000"
     networks:
