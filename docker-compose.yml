@@ -17,6 +17,7 @@ services:
     build:
       context: ./app1
       dockerfile: Dockerfile
+    image: andyby2k26/andyby2k26:app1
     expose:
       - "5000"
     networks:
@@ -32,6 +33,7 @@ services:
     build:
       context: ./app2
       dockerfile: Dockerfile
+    image: andyby2k26/andyby2k26:app2
     expose:
       - "5000"
     networks:
