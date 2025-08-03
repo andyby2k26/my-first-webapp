@@ -1,73 +1,79 @@
-# app2/app.py
-# The boilerplate Flask application for App 2.
-# Identical structure to App 1, but with "App2" specific content.
-# Now uses url_for to generate links, which will correctly prepend the
-# SCRIPT_NAME provided by Nginx.
-# Imported ProxyFix to correctly handle proxy headers.
-from flask import Flask, render_template_string, url_for
-from werkzeug.middleware.proxy_fix import ProxyFix
+import os
+from flask import Flask, render_template, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, SubmitField
+from wtforms.validators import DataRequired
 
+# Initialize Flask app
 app = Flask(__name__)
-# Apply ProxyFix to the Flask app to correctly handle forwarded headers
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
+# Load configuration from environment variables
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a_very_secret_key_that_should_be_in_env_var')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize database and form handling
+db = SQLAlchemy(app)
+
+# ==================================
+# 1. Database Model
+# ==================================
+# Define the Note model to match the app1_data table from your SQL script
+class Note(db.Model):
+    __tablename__ = 'app2_data'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False) # New column
+    content = db.Column(db.Text, nullable=False)     # New column
+    created_at = db.Column(db.TIMESTAMP(timezone=True), server_default=db.func.now())
+
+    def __repr__(self):
+        return f'<Note {self.id}: {self.title}>'
+
+# ==================================
+# 2. Form Class
+# ==================================
+# Define a form using Flask-WTF (no change needed here as fields were already named 'title' and 'content')
+class NoteForm(FlaskForm):
+    title = StringField('Note Title', validators=[DataRequired()])
+    content = TextAreaField('Note Content', validators=[DataRequired()])
+    submit = SubmitField('Save Note')
+
+# ==================================
+# 3. Flask Routes
+# ==================================
 @app.route('/')
-def index():
-    """Renders the main page for App2."""
-    return render_template_string('''
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>App2 Home</title>
-            <style>
-                body { font-family: sans-serif; margin: 20px; background-color: #fff0f5; color: #333; }
-                h1 { color: #8b0000; }
-                a { color: #dc143c; text-decoration: none; }
-                a:hover { text-decoration: underline; }
-                div { background-color: #ffe0e6; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-            </style>
-        </head>
-        <body>
-            <div>
-                <h1>Hello from App2!</h1>
-                <p>This is the main page for App2, served via Nginx.</p>
-                <p>Try navigating to another page within App2:</p>
-                <a href="{{ url_for('about') }}">Go to About Page (internal link)</a>
-            </div>
-        </body>
-        </html>
-    ''')
+def home():
+    # Fetch all notes from the database to display them
+    notes = db.session.execute(db.select(Note).order_by(Note.created_at.desc())).scalars().all()
+    return render_template('index.html', notes=notes)
 
-@app.route('/about')
-def about():
-    """Renders the about page for App2."""
-    return render_template_string('''
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>App2 About</title>
-            <style>
-                body { font-family: sans-serif; margin: 20px; background-color: #fff0f5; color: #333; }
-                h1 { color: #8b0000; }
-                a { color: #dc143c; text-decoration: none; }
-                a:hover { text-decoration: underline; }
-                div { background-color: #ffe0e6; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-            </style>
-        </head>
-        <body>
-            <div>
-                <h1>About App2</h1>
-                <p>This is the about page for App2, demonstrating internal routing.</p>
-                <p>Go back to the main page:</p>
-                <a href="{{ url_for('index') }}">Go back to Home (internal link)</a>
-            </div>
-        </body>
-        </html>
-    ''')
+@app.route('/new-note', methods=['GET', 'POST'])
+def new_note():
+    form = NoteForm()
+    
+    # Check if the form was submitted and is valid
+    if form.validate_on_submit():
+        # Get data from the form
+        note_title = form.title.data
+        note_content = form.content.data
+        
+        # Create a new Note object with separate title and content
+        new_note = Note(title=note_title, content=note_content)
+        
+        # Add the new note to the session and commit to the database
+        db.session.add(new_note)
+        db.session.commit()
+        
+        # Redirect back to the homepage to see the new note
+        return redirect(url_for('home'))
+        
+    # If the form is not submitted or not valid, render the form page
+    return render_template('new_note.html', form=form)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    with app.app_context():
+        # This will create tables if they don't exist.
+        # For production, use a migration tool like Flask-Migrate.
+        db.create_all()
+    app.run(host='0.0.0.0', debug=True)

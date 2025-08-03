@@ -3,119 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Basic Flask App</title>
-    <!-- Basic styling for a cleaner look -->
+    <title>My Note-Taking App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        /* General body styling for a consistent look */
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f6;
             color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        /* Main container for all notes */
+        .container {
+            width: 100%;
+            max-width: 800px;
             text-align: center;
         }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin: 50px auto;
-        }
+
         h1 {
-            color: #0056b3;
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 30px;
         }
-        p {
-            line-height: 1.6;
+
+        /* Styling for the "Create New Note" button */
+        .create-note-button {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-bottom: 30px;
+        }
+
+        .create-note-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        /* Styling for each individual note card */
+        .note-card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 20px;
+            text-align: left;
+            transition: box-shadow 0.3s, transform 0.2s;
+        }
+        
+        .note-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .note-card h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .note-card p {
+            font-size: 14px;
+            color: #777;
+            margin: 0 0 15px 0;
+        }
+
+        .note-card pre {
+            white-space: pre-wrap; /* Preserve formatting but wrap long lines */
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            color: #444;
+            background-color: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 0;
+        }
+
+        /* Styling for the "No notes yet" message */
+        .no-notes {
+            font-size: 18px;
+            color: #777;
+        }
+
+        .no-notes a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .no-notes a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basic HTML Form</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-            text-align: center;
-        }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin: 50px auto;
-        }
-        h1 {
-            color: #0056b3;
-        }
-        p {
-            line-height: 1.6;
-        }
-        form {
-            margin-top: 20px;
-            text-align: left;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"],
-        input[type="email"],
-        textarea {
-            width: calc(100% - 22px); /* Account for padding and border */
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box; /* Include padding and border in the element's total width and height */
-        }
-        textarea {
-            resize: vertical; /* Allow vertical resizing */
-            min-height: 80px;
-        }
-        input[type="submit"] {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
     <div class="container">
-        <h1>Hello Andy!</h1>
-        <p>Really basic web application2.</p>
-        <p>The current time is {{ current_time }} </p>
-        <form action="/page" method="post">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="user_name" required>
-
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="user_email" required>
-
-            <label for="message">Message:</label>
-            <textarea id="message" name="user_message" rows="5"></textarea>
-
-            <input type="submit" value="Send Message">
-        </form>
-
-
+        <h1>My Notes</h1>
+        <a href="{{ url_for('new_note') }}" class="create-note-button">Create New Note</a>
+        
+        {% if notes %}
+            {% for note in notes %}
+                <div class="note-card">
+                    <h2>Note ID: {{ note.id }} - {{ note.title }}</h2>
+                    <p>Created On: {{ note.created_at.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
+                    <pre>{{ note.content }}</pre>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-notes">No notes yet. <a href="{{ url_for('new_note') }}">Create your first note!</a></p>
+        {% endif %}
     </div>
 </body>
 </html>

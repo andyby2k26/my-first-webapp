@@ -1,60 +1,70 @@
-# docker-compose.yml
-# This file defines the services for our multi-app setup:
-# - nginx: The reverse proxy server.
-# - app1: The first Flask application.
-# - app2: The second Flask application.
-# All services communicate over a custom Docker network.
 version: '3.8'
 
 services:
   nginx:
-    # Use the official Nginx image
     image: nginx:latest
-    # Map port 80 on the host to port 80 in the container
     ports:
       - "80:80"
-    # Mount our custom nginx.conf file into the container
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    # Ensure Flask apps are running before Nginx starts
     depends_on:
       - app1
       - app2
-    # Assign Nginx to our custom network
     networks:
       - webapp_network
 
   app1:
-      # Build the image from the Dockerfile in the ./app1 directory
-      build:
-        context: ./app1
-        dockerfile: Dockerfile
-      # Expose port 5000 internally for Nginx to access
-      expose:
-        - "5000"
-      # Assign app1 to our custom network
-      networks:
-        - webapp_network
-      # Optional: Uncomment for Flask development server debugging, though Gunicorn is preferred for production-like setups
-      # environment:
-      #   FLASK_ENV: development
+    build:
+      context: ./app1
+      dockerfile: Dockerfile
+    expose:
+      - "5000"
+    networks:
+      - webapp_network
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/mydatabase
+      SECRET_KEY: 'your-very-long-and-secure-random-secret-key-for-app1'
 
   app2:
-    # Build the image from the Dockerfile in the ./app2 directory
     build:
       context: ./app2
       dockerfile: Dockerfile
-    # Expose port 5000 internally for Nginx to access
     expose:
       - "5000"
-    # Assign app2 to our custom network
     networks:
       - webapp_network
-    # Optional: Uncomment for Flask development server debugging
-    # environment:
-    #   FLASK_ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/mydatabase
+      SECRET_KEY: 'your-very-long-and-secure-random-secret-key-for-app2'
 
-# Define a custom network for inter-container communication
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    networks:
+      - webapp_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydatabase"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 networks:
   webapp_network:
     driver: bridge
+
+volumes:
+  db_data:
