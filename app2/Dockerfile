@@ -1,16 +1,16 @@
-# app2/Dockerfile
-# Dockerfile for the second Flask application.
-# Identical to app1's Dockerfile, as the setup is the same.
-FROM python:3.9-slim-buster
+FROM python:3.11-slim-bookworm
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y libpq-dev gcc
+    apt-get install -y --no-install-recommends \
+        libpq-dev gcc build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install -r requirements.txt
-
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
