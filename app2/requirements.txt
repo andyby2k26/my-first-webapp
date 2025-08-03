@@ -1,7 +1,0 @@
-Flask
-Flask-WTF
-gunicorn
-requests
-Werkzeug
-psycopg2
-flask-sqlalchemy
