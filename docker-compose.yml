@@ -2,7 +2,86 @@ version: '3.8'
 
 services:
   nginx:
+    image: nginx:latestversion: '3.8'
+
+services:
+  nginx:
     image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      app1:
+        condition: service_healthy
+      app2:
+        condition: service_healthy
+    networks:
+      - webapp_network
+
+  app1:
+    image: andyby2k26/andyby2k26:app1
+    expose:
+      - "5000"
+    networks:
+      - webapp_network
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/mydatabase
+      SECRET_KEY: 'your-very-long-and-secure-random-secret-key-for-app1'
+    healthcheck:
+      # This example assumes your Flask app has a /health or a / route
+      # that returns a 200 OK response.
+      test: ["CMD", "curl", "--fail", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app2:
+    image: andyby2k26/andyby2k26:app2
+    expose:
+      - "5000"
+    networks:
+      - webapp_network
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/mydatabase
+      SECRET_KEY: 'your-very-long-and-secure-random-secret-key-for-app2'
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    networks:
+      - webapp_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydatabase"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  webapp_network:
+    driver: bridge
+
+volumes:
+  db_data:
     ports:
       - "80:80"
     volumes:
