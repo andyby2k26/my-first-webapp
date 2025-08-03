@@ -1,6 +1,6 @@
 # Dockerfile for the first Flask application.
 # It builds a Python environment, installs dependencies, and runs the Flask app with Gunicorn.
-FROM python:3.9-slim-buster
+FROM python:3.11-alpine
 
 WORKDIR /app
 
