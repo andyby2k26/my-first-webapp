@@ -9,7 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the Flask application code
-COPY app.py .
+COPY . .
 
 # Command to run the Flask application using Gunicorn
 # Gunicorn serves the 'app' object from 'app.py' on port 5000

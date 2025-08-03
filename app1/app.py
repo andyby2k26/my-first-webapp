@@ -4,10 +4,10 @@
 # Now uses url_for to generate links, which will correctly prepend the
 # SCRIPT_NAME provided by Nginx.
 # Imported ProxyFix to correctly handle proxy headers.
-from flask import Flask, render_template_string, url_for
+from flask import Flask, render_template_string, url_for, render_template
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='images')
 # Apply ProxyFix to the Flask app to correctly handle forwarded headers
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
@@ -35,6 +35,7 @@ def index():
                 <p>This is the main page for App1, served via Nginx.</p>
                 <p>Try navigating to another page within App1:</p>
                 <a href="{{ url_for('about') }}">Go to About Page (internal link)</a>
+                <a href="{{ url_for('ellie') }}">Go to Ellie Page (internal link)</a>
             </div>
         </body>
         </html>
@@ -69,7 +70,12 @@ def about():
         </html>
     ''')
 
+@app.route('/ellie')
+def ellie():
+    """Renders the about page for App1."""
+    return render_template('ellie.html')
+
 if __name__ == '__main__':
     # When running locally (outside Docker), use this.
     # Inside Docker, Gunicorn handles the serving.
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True,host='0.0.0.0', port=5000)
